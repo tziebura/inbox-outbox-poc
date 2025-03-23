@@ -1,0 +1,31 @@
+parameters:
+
+services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+
+    App\:
+        resource: '../src/'
+        exclude:
+            - '../src/DependencyInjection/'
+            - '../src/Entity/'
+            - '../src/Kernel.php'
+
+    App\Order\Event\Publisher:
+        arguments:
+            - '@App\Shared\EventBus\TransactionalEventBus'
+
+    App\Shared\Outbox\MessageHandler:
+        arguments:
+            - '@App\Shared\EventBus\SymfonyMessengerEventBus'
+
+    app.shared.message_bus.serializer.publish_serializer:
+        class: App\Shared\MessageBus\Serializer\PublishSerializer
+
+    app.shared.message_bus.serializer.consume_serializer:
+        class: App\Shared\MessageBus\Serializer\ConsumeSerializer
+        arguments:
+            - '@messenger.transport.symfony_serializer'
+
+    messenger.middleware.inbox: '@App\Shared\MessageBus\Middleware\InboxMiddleware'
